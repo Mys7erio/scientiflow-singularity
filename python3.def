@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+
+%post
+        apt-get update && \
+        apt-get install -y python3
+
+%test
+        echo "$(python3 --version) is installed at $(which python3)"
+
+
+%runscript
+        python3 "$@"
+
+
+%help
+	Run singularity test python3.sif to check installation
+	Run singularity run python3.sif "any valid argument to the python interpreter"
+
+	Example:
+		singularity run python3.sif my_file.py
+
+		singularity run python3 -c "print('hello world!')"    #inline execution

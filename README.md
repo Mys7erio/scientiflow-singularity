@@ -13,5 +13,15 @@ $ sudo singularity build --sandbox python3.sif python3.def
         # Run singularity run python3.sif "any valid argument to the python interpreter"
 
         # Example:
-                $ sudo singularity run python3.sif -c "print('hello world')"    #inline execution
+                singularity run python3.sif -c "print('hello world')"    #inline execution
+```
+
+### Singularity Commands
+
+```bash
+# build with:
+sudo singularity build gromacs-24.3.sif gromacs-24.3.def
+
+# Todo add gmx to path inside the docker container
+singularity exec gromacs-24.3.sif /usr/local/gromacs/bin/gmx
 ```
