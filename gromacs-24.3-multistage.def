@@ -30,9 +30,14 @@ Bootstrap: docker
 From: ubuntu:22.04
 Stage: final
 
+
 %environment
     export DEBIAN_FRONTEND=noninteractive
     export TZ=Asia/Kolkata
+    export PATH="/usr/local/gromacs/bin:$PATH"
+    # Set environment variables
+    source /usr/local/gromacs/bin/GMXRC
+
 
 %post
     ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
@@ -43,9 +48,23 @@ Stage: final
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy GROMACS binaries from the build stage
+    echo "export PATH=/usr/local/gromacs/bin:$PATH" >> ~/.bashrc
+
+
 %files from build
+# Copy GROMACS binaries from the build stage
 /usr/local/gromacs /usr/local/
+
+
+%runscript
+    # Run GROMACS command
+    gmx "$@"
+
+
+%labels
+    Version 2024.3
+    Description GROMACS 2024.3 without GPU support
+
 
 %help
     Run singularity test gromacs-24.3.sif to check installation
