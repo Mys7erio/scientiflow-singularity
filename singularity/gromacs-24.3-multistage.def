@@ -1,0 +1,73 @@
+Bootstrap: docker
+From: ubuntu:22.04
+Stage: build
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=Asia/Kolkata
+
+%post
+    ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+
+    apt-get update && \
+    apt-get install -y build-essential git gcc g++ cmake gfortran freeglut3-dev libfftw3-dev libgsl-dev libxml2-dev libopenmpi-dev openmpi-bin python3 python3-pip wget curl
+
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+    # Download and build GROMACS
+    wget https://ftp.gromacs.org/gromacs/gromacs-2024.3.tar.gz
+    tar xfz gromacs-2024.3.tar.gz
+    cd gromacs-2024.3
+    mkdir build
+    cd build
+    cmake .. -DGMX_BUILD_OWN_FFTW=ON -DREGRESSIONTEST_DOWNLOAD=ON
+    make -j$(nproc)
+    make install
+
+# Second stage: Minimal runtime environment
+Bootstrap: docker
+From: ubuntu:22.04
+Stage: final
+
+
+%environment
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=Asia/Kolkata
+    export PATH="/usr/local/gromacs/bin:$PATH"
+    # Set environment variables
+    source /usr/local/gromacs/bin/GMXRC
+
+
+%post
+    ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+
+    apt-get update && \
+    apt-get install -y libgsl27 libgslcblas0 libxml2 libfftw3-3 libopenmpi3 openmpi-bin
+
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+    echo "export PATH=/usr/local/gromacs/bin:$PATH" >> ~/.bashrc
+
+
+%files from build
+# Copy GROMACS binaries from the build stage
+/usr/local/gromacs /usr/local/
+
+
+%runscript
+    # Run GROMACS command
+    gmx "$@"
+
+
+%labels
+    Version 2024.3
+    Description GROMACS 2024.3 without GPU support
+
+
+%help
+    Run singularity test gromacs-24.3.sif to check installation
+    Run singularity run gromacs-24.3.sif "any valid gmx command"
+    Example:
+        singularity run gromacs.sif --version
