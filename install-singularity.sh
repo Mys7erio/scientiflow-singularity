@@ -2,7 +2,7 @@ DEBIAN_FRONTEND=noninteractive
 
 # Update package repository and install dependencies
 sudo apt update && \
-sudo apt-get install -y cryptsetup-bin libfuse2 uidmap fuse2fs fuse liblzo2-2 squashfs-tools
+sudo apt-get install -y cryptsetup-bin libfuse2 uidmap fuse2fs fuse liblzo2-2 squashfs-tools crun
 
 
 # Download and install go
