@@ -6,17 +6,20 @@ sudo apt-get install -y cryptsetup-bin libfuse2 uidmap fuse2fs fuse liblzo2-2 sq
 
 
 # Download and install go
-echo -n "[+] Installing GO... "
-curl -sL https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o /tmp/go1.23.1.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go1.23.1.linux-amd64.tar.gz
-rm /tmp/go1.23.1.linux-amd64.tar.gz
+if ! go version 2>&1 > /dev/null
+then
+    echo -n "[+] Go not found! Installing GO... "
+    curl -sL https://go.dev/dl/go1.23.1.linux-amd64.tar.gz -o /tmp/go1.23.1.linux-amd64.tar.gz
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go1.23.1.linux-amd64.tar.gz
+    rm /tmp/go1.23.1.linux-amd64.tar.gz
 
-# Add go to PATH permanently
-echo -n "Adding to PATH... "
-echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
-echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
-source ~/.bashrc
-echo "Done"
+    # Add go to PATH permanently
+    echo -n "Adding to PATH... "
+    echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
+    echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
+    source ~/.bashrcz
+    echo "Done"
+fi
 
 
 # Download singularity binary specific to ubuntu CODENAME
