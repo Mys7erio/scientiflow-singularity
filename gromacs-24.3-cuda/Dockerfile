@@ -58,6 +58,11 @@ RUN apt-get update && \
 # Copy GROMACS binaries from the build stage
 COPY --from=build /usr/local/gromacs /usr/local/gromacs
 
+# Copy forcefield files from local directory
+COPY forcefields/gromos45a3-ptm.ff /usr/local/gromacs/share/gromacs/top/
+COPY forcefields/gromos54a7-ptm.ff /usr/local/gromacs/share/gromacs/top/
+COPY forcefields/gromos54a8-ptm.ff /usr/local/gromacs/share/gromacs/top/
+
 # Set environment variables
 RUN echo "source /usr/local/gromacs/bin/GMXRC" >> ~/.bashrc
 
