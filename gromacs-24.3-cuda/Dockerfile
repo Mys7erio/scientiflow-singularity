@@ -69,9 +69,5 @@ RUN echo "source /usr/local/gromacs/bin/GMXRC" >> ~/.bashrc
 # Default command to run GROMACS
 ENTRYPOINT ["/usr/local/gromacs/bin/gmx"]
 
-
 # Labels
 LABEL Version="2024.3" Description="GROMACS 2024.3 with CUDA support"
-
-# Help
-CMD ["--help"]
