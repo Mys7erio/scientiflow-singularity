@@ -17,7 +17,7 @@ then
     echo -n "Adding to PATH... "
     echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
     echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
-    source ~/.bashrcz
+    source ~/.bashrc
     echo "Done"
 fi
 
