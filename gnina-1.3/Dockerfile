@@ -54,10 +54,12 @@ RUN git clone https://github.com/openbabel/openbabel.git && \
     make -j $(nproc) && make install
 
 # Clone and build gnina
+# ['/usr/local/lib/python3.10/dist-packages/torch']
+# cmake .. && \
 RUN git clone https://github.com/gnina/gnina.git && \
     cd gnina && \
     mkdir build && cd build && \
-    cmake .. && \
+    cmake -DCMAKE_PREFIX_PATH=/root/.local/lib/python3.12/site-packages/torch .. && \
     make -j $(nproc) && make install
 
 # Second stage: Minimal runtime environment with CUDA support
