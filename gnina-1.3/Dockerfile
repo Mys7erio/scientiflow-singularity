@@ -51,14 +51,14 @@ RUN git clone https://github.com/openbabel/openbabel.git && \
     git checkout openbabel-3-1-1 && \
     mkdir build && cd build && \
     cmake -DWITH_MAEPARSER=OFF -DWITH_COORDGEN=OFF -DPYTHON_BINDINGS=ON -DRUN_SWIG=ON .. && \
-    make -j4 && make install
+    make -j $(nproc) && make install
 
 # Clone and build gnina
 RUN git clone https://github.com/gnina/gnina.git && \
     cd gnina && \
     mkdir build && cd build && \
     cmake .. && \
-    make -j4 && make install
+    make -j $(nproc) && make install
 
 # Second stage: Minimal runtime environment with CUDA support
 FROM ubuntu:22.04 AS final
