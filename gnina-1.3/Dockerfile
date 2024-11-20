@@ -92,6 +92,8 @@ RUN apt-get update && \
 
 # Copy installed binaries and files from the build stage
 COPY --from=build /root /root
+COPY --from=build /gnina /root/gnina
+COPY --from=build /openbabel /root/openbabel
 
 # Set environment variables to run software
 RUN echo "source /root/openbabel/bin/obabel" >> ~/.bashrc
