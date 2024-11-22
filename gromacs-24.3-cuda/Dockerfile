@@ -64,7 +64,8 @@ COPY forcefields/gromos54a7-ptm.ff /usr/local/gromacs/share/gromacs/top/
 COPY forcefields/gromos54a8-ptm.ff /usr/local/gromacs/share/gromacs/top/
 
 # Set environment variables
-RUN echo "source /usr/local/gromacs/bin/GMXRC" >> ~/.bashrc
+RUN echo "source /usr/local/gromacs/bin/GMXRC.bash" >> /root/.bashrc
+RUN echo "source /usr/local/gromacs/bin/GMXRC.bash" >> /etc/profile
 
 # Default command to run GROMACS
 ENTRYPOINT ["/usr/local/gromacs/bin/gmx"]
