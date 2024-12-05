@@ -1,107 +1,34 @@
-# First stage: Build stage for dependencies and software installation
-FROM ubuntu:22.04 AS build
+FROM nvidia/cuda:12.6.2-devel-ubuntu24.04 AS build
 
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Asia/Kolkata \
-    CUDACXX=/usr/local/cuda/bin/nvcc
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-12.0/lib64:${LD_LIBRARY_PATH}
 
-# Install essential packages
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
-    libboost-all-dev \
-    libeigen3-dev \
-    libgoogle-glog-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
-    libhdf5-dev \
-    libatlas-base-dev \
-    python3-dev \
-    librdkit-dev \
-    python3-numpy \
-    python3-pip \
-    python3-pytest \
-    swig \
-    git-all \
-    curl \
-    libjsoncpp-dev
+RUN apt-get update && apt-get install -y software-properties-common && add-apt-repository universe
 
-# Add CUDA repository and install CUDA toolkit
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb && \
-    dpkg -i cuda-keyring_1.0-1_all.deb && \
-    apt-get update && \
-    apt-get install -y libnvidia-compute-535 cuda-toolkit-12-0 && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm cuda-keyring_1.0-1_all.deb
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential cmake cmake wget git python3-pip python3-dev zlib1g-dev libopenbabel-dev \
+    libprotobuf-dev protobuf-compiler libboost-all-dev libjsoncpp-dev libeigen3-dev libgoogle-glog-dev \
+    libhdf5-dev libatlas-base-dev librdkit-dev python3-pytest python3-numpy && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-RUN pip3 install --upgrade pip && \
-    pip3 install \
-    cmake \
-    scikit-image \
-    pyquaternion \
-    google-api-python-client \
-    six \
-    torch torchvision torchaudio
-
-# Clone and build openbabel
-RUN git clone https://github.com/openbabel/openbabel.git && \
-    cd openbabel && \
-    git checkout openbabel-3-1-1 && \
-    mkdir build && cd build && \
-    cmake -DWITH_MAEPARSER=OFF -DWITH_COORDGEN=OFF -DPYTHON_BINDINGS=ON -DRUN_SWIG=ON .. && \
-    make -j $(nproc) && make install
-
-# Clone and build gnina
-# ['/usr/local/lib/python3.10/dist-packages/torch']
-# cmake .. && \
+# Build GNINA
 RUN git clone https://github.com/gnina/gnina.git && \
     cd gnina && \
     mkdir build && cd build && \
-    cmake -DCMAKE_PREFIX_PATH=/root/.local/lib/python3.12/site-packages/torch .. && \
-    make -j $(nproc) && make install
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF .. && \
+    make -j$(nproc)
 
-# Second stage: Minimal runtime environment with CUDA support
-FROM ubuntu:22.04 AS final
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive \
-    TZ=Asia/Kolkata
+# Final runtime image
+FROM nvidia/cuda:12.6.3-base-ubuntu24.04
 
-# Add CUDA repository and install CUDA runtime libraries
-RUN apt-get update && \
-    apt-get install -y curl && \
-    curl https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb -o cuda-keyring_1.0-1_all.deb && \
-    dpkg -i cuda-keyring_1.0-1_all.deb && \
-    rm cuda-keyring_1.0-1_all.deb
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda-12.0/lib64:${LD_LIBRARY_PATH}
 
-# Install necessary runtime libraries and CUDA runtime
-RUN apt-get update && \
-    apt-get install -y \
-    libgsl27 \
-    libgslcblas0 \
-    libxml2 \
-    libfftw3-3 \
-    libopenmpi3 \
-    openmpi-bin \
-    cuda-cudart-12-0 \
-    libcufft-12-0 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy installed binaries and files from the build stage
-COPY --from=build /root /root
-COPY --from=build /gnina /root/gnina
-COPY --from=build /openbabel /root/openbabel
-
-# Set environment variables to run software
-RUN echo "source /root/openbabel/bin/obabel" >> ~/.bashrc
+COPY --from=build /gnina /root
 RUN echo "source /root/gnina/bin/gnina" >> ~/.bashrc
 
 # Default command to run GNINA
 ENTRYPOINT ["/root/gnina/bin/gnina"]
 
 # Labels
-LABEL Version="1.0" Description="OpenBabel and GNINA with CUDA support"
-
+LABEL Version="1.0" Description="GNINA with CUDA support"
