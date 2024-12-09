@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y software-properties-common && add-apt-r
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake cmake wget git python3-pip python3-dev zlib1g-dev libopenbabel-dev \
     libprotobuf-dev protobuf-compiler libboost-all-dev libjsoncpp-dev libeigen3-dev libgoogle-glog-dev \
-    libhdf5-dev libatlas-base-dev librdkit-dev python3-pytest python3-numpy && \
+    libhdf5-dev libatlas-base-dev librdkit-dev python3-pytest python3-numpy libbz2-dev libzstd-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
