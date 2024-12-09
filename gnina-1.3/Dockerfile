@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install torch
-RUN pip install torch --break-system-packages
+RUN pip install torch pytest --break-system-packages
 
 # Build GNINA
 RUN git clone https://github.com/gnina/gnina.git && \
