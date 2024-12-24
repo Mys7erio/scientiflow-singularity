@@ -63,12 +63,13 @@ COPY forcefields/gromos45a3-ptm.ff /usr/local/gromacs/share/gromacs/top/
 COPY forcefields/gromos54a7-ptm.ff /usr/local/gromacs/share/gromacs/top/
 COPY forcefields/gromos54a8-ptm.ff /usr/local/gromacs/share/gromacs/top/
 
-# Set environment variables
+# Set environment variables and softlink gmx binary
 RUN echo "source /usr/local/gromacs/bin/GMXRC.bash" >> /root/.bashrc
 RUN echo "source /usr/local/gromacs/bin/GMXRC.bash" >> /etc/profile
+RUN ln -s /usr/local/gromacs/bin/gmx /usr/local/bin/
 
 # Default command to run GROMACS
 ENTRYPOINT ["/usr/local/gromacs/bin/gmx"]
 
 # Labels
-LABEL Version="2024.3" Description="GROMACS 2024.3 with CUDA support"
+LABEL Version="2024.3" Description="GROMACS 2024.3 with CUDA runtime"
