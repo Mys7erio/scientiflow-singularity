@@ -1,0 +1,36 @@
+FROM python:3.12-slim-bullseye AS build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl cmake build-essential g++ swig && \
+    # apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    curl -L https://github.com/openbabel/openbabel/archive/refs/tags/openbabel-3-1-1.tar.gz | tar xzf - && \
+    cd openbabel-openbabel-3-1-1 && mkdir build && cd build && \
+    cmake -DWITH_MAEPARSER=OFF -DWITH_COORDGEN=OFF -DPYTHON_BINDINGS=ON -DRUN_SWIG=ON .. && \
+    make -j $(nproc) && make install
+    # cd / && rm -rf openbabel-openbabel-3-1-1
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONPATH=/root \
+    LD_LIBRARY_PATH=/usr/local/lib
+
+
+FROM python:3.12-slim-bullseye AS final
+
+# Install runtime dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     python3-lxml python3-pymol && \
+#     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy necessary files from build stage
+COPY --from=build /usr/local/bin/obabel /usr/local/bin/
+# COPY --from=build /usr/local/include/openbabel/ /usr/local/include/openbabel/
+COPY ./plip/plip /root/plip
+
+RUN pip install --no-cache-dir numpy lxml && \
+    pip install --no-cache-dir openbabel \
+    --global-option="-I/usr/local/include/openbabel3" \
+    --global-option="-L/usr/local/lib"
+
+
+# Set entrypoint to plipcmd.py
+ENTRYPOINT ["python3", "/root/plip/plipcmd.py"]
