@@ -57,13 +57,14 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
 
 COPY --from=build /usr/local/gromacs /usr/local/gromacs
 RUN echo "source /usr/local/gromacs/bin/GMXRC" >> /etc/profile.d/gromacs.sh
+RUN ln -s /usr/local/gromacs/bin/gmx /usr/local/bin/
+
 
 # Run GROMACS command
 ENTRYPOINT ["gmx"]
 
 # Metadata
-LABEL version="2024.3" \
-      description="GROMACS 2024.3"
+LABEL version="2024.3" description="GROMACS 2024.3"
 
 # Example usage help
 CMD ["--help"]
