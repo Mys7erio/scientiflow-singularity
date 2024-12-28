@@ -5,8 +5,7 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/*
 
 # Download and the gnina precompiled binarie
-RUN wget -qL --show-progress https://github.com/gnina/gnina/releases/download/v1.3/gnina -O /root/gnina && \
-    chmod +x /root/gnina
+RUN wget -q --show-progress https://github.com/gnina/gnina/releases/download/v1.3/gnina -O /usr/local/bin/gnina && \
+    chmod +x /usr/local/bin/gnina
 
-
-ENTRYPOINT ["/root/gnina"]
+ENTRYPOINT ["/usr/local/bin/gnina"]
