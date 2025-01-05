@@ -9,7 +9,22 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install necessary packages for building and CUDA
 RUN ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && \
     apt-get update && \
-    apt-get install -y build-essential git gcc g++ cmake gfortran freeglut3-dev libfftw3-dev libgsl-dev libxml2-dev libopenmpi-dev openmpi-bin python3 python3-pip wget curl
+    apt-get install -y build-essential git \
+    gcc \
+    g++ \
+    cmake \
+    gfortran \
+    freeglut3-dev \
+    libfftw3-dev \
+    libgsl-dev \
+    libxml2-dev \
+    libopenmpi-dev \
+    openmpi-bin \
+    libboost-all-dev \
+    python3 \
+    python3-pip \
+    wget \
+    curl
 
 # Add CUDA repository
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/cuda-keyring_1.0-1_all.deb && \
@@ -36,6 +51,14 @@ RUN cmake .. -DGMX_BUILD_OWN_FFTW=ON -DGMX_GPU=CUDA -DREGRESSIONTEST_DOWNLOAD=ON
 RUN make -j$(nproc)
 RUN make install
 
+# Install DSSP
+RUN git clone https://github.com/cmbi/dssp.git /dssp && \
+    cd /dssp && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install
+
 # Second stage: Minimal runtime environment with CUDA support
 FROM ubuntu:22.04 AS final
 
@@ -50,18 +73,28 @@ RUN apt-get -y update && \
 
 # Install necessary libraries and CUDA runtime libraries
 RUN apt-get update && \
-    apt-get install -y libgsl27 libgslcblas0 libxml2 libfftw3-3 libopenmpi3 openmpi-bin && \
+    apt-get install -y libgsl27 \
+    libgslcblas0 \
+    libxml2 \
+    libfftw3-3 \
+    libopenmpi3 \
+    openmpi-bin \
+    libboost-iostreams1.74.0 \
+    libboost-program-options1.74.0 \
+    libboost-thread1.74.0 && \
     apt-get install -y cuda-cudart-12-0 libcufft-12-0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy GROMACS binaries from the build stage
 COPY --from=build /usr/local/gromacs /usr/local/gromacs
+COPY --from=build /usr/local/bin/mkdssp /usr/local/bin/mkdssp
 
 # Copy forcefield files from local directory
 COPY forcefields/gromos45a3-ptm.ff /usr/local/gromacs/share/gromacs/top/
 COPY forcefields/gromos54a7-ptm.ff /usr/local/gromacs/share/gromacs/top/
 COPY forcefields/gromos54a8-ptm.ff /usr/local/gromacs/share/gromacs/top/
+COPY forcefields/charmm36.ff /usr/local/gromacs/share/gromacs/top/
 
 # Set environment variables and softlink gmx binary
 RUN echo "source /usr/local/gromacs/bin/GMXRC.bash" >> /root/.bashrc
