@@ -1,8 +1,8 @@
-FROM debian:bookworm-slim AS base
+FROM ubuntu:24.04 AS base
 
 # Install dependencies and micromamba in a single step
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget curl bzip2 ca-certificates \
+    wget curl bzip2 ca-certificates libgomp1\
     && curl -L https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj -C /usr/local/bin --strip-components=1 bin/micromamba \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -18,21 +18,9 @@ RUN micromamba create -y -n gmx_env python=3.8 gmx_MMPBSA && \
 ENV CONDA_DEFAULT_ENV=gmx_env
 ENV PATH=/opt/micromamba/envs/gmx_env/bin:$PATH
 
-
-# Initialize the micromamba shell in bash
-RUN micromamba shell init --shell bash --root-prefix=$MAMBA_ROOT_PREFIX
-
-# Add a wrapper script to activate environment and run gmx_MMPBSA
-RUN echo '#!/bin/bash' > /usr/local/bin/run_gmx && \
-    echo 'eval "$(micromamba shell hook --shell=bash)"' >> /usr/local/bin/run_gmx && \
-    echo 'micromamba activate gmx_env' >> /usr/local/bin/run_gmx && \
-    echo 'exec gmx_MMPBSA' >> /usr/local/bin/run_gmx && \
-    chmod +x /usr/local/bin/run_gmx
+RUN curl -L https://scientiflow.s3.ap-south-1.amazonaws.com/gromacs.tar.gz |tar xzvf - && \
+    ln -s /usr/local/gromacs/bin/gmx /usr/local/bin/gmx && \
+    ln -s /opt/micromamba/envs/gmx_env/bin/gmx_MMPBSA /usr/local/bin/gmx_MMPBSA
 
 
-RUN chmod +x /usr/local/bin/run_gmx
-
-
-
-# Set the ENTRYPOINT to run the wrapper script
-ENTRYPOINT [ "/usr/local/bin/run_gmx" ]
+ENTRYPOINT [ "/usr/local/bin/gmx_MMPBSA" ]
