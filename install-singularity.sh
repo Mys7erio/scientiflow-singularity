@@ -1,6 +1,6 @@
 # Update package repository and install dependencies
 apt update && \
-apt-get install -y cryptsetup-bin libfuse2 uidmap fuse2fs fuse liblzo2-2 squashfs-tools crun
+apt-get install -y cryptsetup-bin libfuse2 uidmap fuse2fs fuse liblzo2-2 squashfs-tools runc libglib2.0-0
 
 # Source bashrc to update PATH and check if binaries are already available
 source ~/.bashrc
