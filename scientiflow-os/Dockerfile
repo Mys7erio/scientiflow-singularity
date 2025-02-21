@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update and install utilities
 RUN apt-get update && apt-get -y upgrade && \
-    apt-get install -y nano vim curl wget python3 python3-pip tzdata nvidia-container-toolkit
+    apt-get install -y nano vim curl wget python3 python3-pip tzdata nvidia-container-toolkit openssh-server tini
 
 # Install nvidia-cuda-toolkit
 # RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
@@ -24,8 +24,23 @@ RUN curl https://raw.githubusercontent.com/Mys7erio/scientiflow-singularity/refs
 # Install scientiflow-cli
 RUN pip install --no-cache-dir scientiflow-cli
 
+RUN echo 'root:password' | chpasswd
+RUN mkdir /var/run/sshd && \
+    echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
+    echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+
+# Expose Port 22 for SSH to work
+EXPOSE 22
+
+# Exporting custom aliases
+RUN echo "alias sudo=''" > /root/.bashrc
+
 # Modify singularity configuration file using appropriate settings
 RUN sed -i 's/^use nvidia-container-cli = no$/use nvidia-container-cli = yes/' /etc/singularity/singularity.conf
 RUN sed -i 's/^# nvidia-container-cli path =/nvidia-container-cli path = \/usr\/bin\/nvidia-container-cli/' /etc/singularity/singularity.conf
+
+
+ENTRYPOINT ["/bin/bash", "-c", "/usr/sbin/sshd -D & exec /bin/bash"]
+
 
 
