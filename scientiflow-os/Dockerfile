@@ -39,8 +39,13 @@ RUN echo "alias sudo=''" > /root/.bashrc
 RUN sed -i 's/^use nvidia-container-cli = no$/use nvidia-container-cli = yes/' /etc/singularity/singularity.conf
 RUN sed -i 's/^# nvidia-container-cli path =/nvidia-container-cli path = \/usr\/bin\/nvidia-container-cli/' /etc/singularity/singularity.conf
 
+# Test out web terminal
+RUN wget -qO /bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64 && \
+    chmod +x /bin/ttyd
 
-ENTRYPOINT ["/bin/bash", "-c", "/usr/sbin/sshd -D & exec /bin/bash"]
+
+ENTRYPOINT ["/bin/ttyd", "-p", "8080", "-c", "root:Password#69", "/bin/bash"]
+# ENTRYPOINT ["/bin/bash", "-c", "/usr/sbin/sshd -D & exec /bin/bash"]
 
 
 

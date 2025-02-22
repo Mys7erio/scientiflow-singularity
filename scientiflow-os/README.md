@@ -10,6 +10,12 @@ nvidia-smi      ->  ?
 cuda-runtime    ->  cuda 12.8.0
 </pre>
 
+## Pseudo sudo
+
+Habituated to typing `sudo` before privilleged commands, or copy-pasting commands from the internet but then it fails because there's no sudo? Well, pseudo sudo to rescue.
+
+What exactly is it? A simple alias `sudo=''`
+
 # Host Requirements
 
 ## NVIDIA GPU Drivers
