@@ -1,22 +1,14 @@
-# FROM ubuntu:22.04
-# FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
 FROM nvidia/cuda:12.8.0-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update and install utilities
 RUN apt-get update && apt-get -y upgrade && \
-    apt-get install -y nano vim curl wget python3 python3-pip tzdata nvidia-container-toolkit openssh-server tini
-
-# Install nvidia-cuda-toolkit
-# RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
-#     dpkg -i cuda-keyring_1.1-1_all.deb && \
-#     apt-get update && \
-#     apt-get -y install cuda-toolkit-12-8
+    apt-get install -y nano vim curl wget tmux python3 python3-pip tzdata nvidia-container-toolkit 
 
 
 # Install nvidia utils (nvidia-smi) and other utils
-RUN apt-get install -y nvidia-utils-570  libglib2.0-0 libglib2.0-data libicu70 libxml2 runc shared-mime-info xdg-user-dirs
+RUN apt-get install -y nvidia-utils-550  libglib2.0-0 libglib2.0-data libicu70 libxml2 runc shared-mime-info xdg-user-dirs
 
 # Install go and singularity using the install script
 RUN curl https://raw.githubusercontent.com/Mys7erio/scientiflow-singularity/refs/heads/main/install-singularity.sh | bash
@@ -24,28 +16,16 @@ RUN curl https://raw.githubusercontent.com/Mys7erio/scientiflow-singularity/refs
 # Install scientiflow-cli
 RUN pip install --no-cache-dir scientiflow-cli
 
-RUN echo 'root:password' | chpasswd
-RUN mkdir /var/run/sshd && \
-    echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
-    echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+# Exporting custom aliases, and add custom tmux config
+RUN echo "alias sudo=''" > /root/.bashrc && \
+    curl -s https://gist.githubusercontent.com/Mys7erio/8c54af5bb128f171c4e0a77de4ccf426/raw/8c75689bdf547e60244c224b998760b8b9464a04/.tmux.conf -o ~/.tmux.conf && \
+    echo "export PS1='\[\e[0;38;5;82m\]$ \[\e[0;38;5;45m\]\u \[\e[0;38;5;45m\](\[\e[0;38;5;39m\]\W\[\e[0;38;5;45m\]) \[\e[0;1;38;5;45m\]>\[\e[0m\] '" >> /root/.bashrc
 
-# Expose Port 22 for SSH to work
-EXPOSE 22
 
-# Exporting custom aliases
-RUN echo "alias sudo=''" > /root/.bashrc
 
 # Modify singularity configuration file using appropriate settings
 RUN sed -i 's/^use nvidia-container-cli = no$/use nvidia-container-cli = yes/' /etc/singularity/singularity.conf
 RUN sed -i 's/^# nvidia-container-cli path =/nvidia-container-cli path = \/usr\/bin\/nvidia-container-cli/' /etc/singularity/singularity.conf
 
-# Test out web terminal
-RUN wget -qO /bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64 && \
-    chmod +x /bin/ttyd
 
-
-ENTRYPOINT ["/bin/ttyd", "-p", "8080", "-c", "root:Password#69", "/bin/bash"]
-# ENTRYPOINT ["/bin/bash", "-c", "/usr/sbin/sshd -D & exec /bin/bash"]
-
-
-
+ENTRYPOINT ["/bin/bash"]
