@@ -1,0 +1,7 @@
+FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04
+
+RUN apt-get update && \
+    apt-get install -y git curl libboost-program-options1.83.0 libboost-filesystem1.83.0 &&
+    curl https://github.com/DeltaGroupNJUPT/Vina-GPU-2.1 -LO /usr/local/bin/Vina-GPU-2.1 &&
+    chmod +x /usr/local/bin/Vina-GPU-2.1
+
