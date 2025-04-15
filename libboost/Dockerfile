@@ -19,8 +19,5 @@ RUN cd /libboost && \
     tar czvf /libboost.tar.gz /usr/local/lib/libboost_*
 
 
-ENTRYPOINT ["/bin/bash"]
-
-
 LABEL Version="1.84"
 LABEL Description="This container downloads and builds libboost1.84 from source.  It is solely intended to be used as a utility container to build boost headers and shared libraries, which should be transfered to other containers which require it."
