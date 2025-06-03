@@ -18,15 +18,12 @@ RUN curl -L https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj -C 
     chmod +x /usr/local/bin/entrypoint.sh
 
 
-# Create a conda environment for rdkit
-# RUN micromamba install -y -c conda-forge rdkit && \
-#     micromamba clean --all --yes
-RUN micromamba create -y -n pyenv_general python=3.12 -c conda-forge \
-    rdkit numpy biopython
+# Create a conda environment, and install dependencies and complementary packages
+RUN micromamba create -y python=3.11 \
+    -n pyenv_general  \
+    -c conda-forge -c salilab -c defaults \
+    biopython numpy rdkit modeller
 
-
-# Install biopython from pip
-# RUN pip install --no-cache --break-system-packages biopython
 
 # Install gromacs from local directory, and extract inside the container
 COPY ./gromacs.tar.gz /tmp/gromacs.tar.gz
