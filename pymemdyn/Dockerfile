@@ -32,7 +32,7 @@ RUN tar xzvf /tmp/gromacs.tar.gz -C / && \
 
 
 # Install PyMemDyn
-RUN cd /root && \
+RUN cd /opt && \
     curl -LO https://github.com/GPCR-ModSim/pymemdyn/archive/refs/heads/main.zip && \
     unzip main.zip && \
     mv pymemdyn-main pymemdyn && \
@@ -40,7 +40,9 @@ RUN cd /root && \
 
 
 # Add pymemdyn executable to path by soft-linking
-RUN ln -s /root/pymemdyn/pymemdyn /usr/local/bin/pymemdyn  
+RUN ln -s /opt/pymemdyn/pymemdyn /usr/local/bin/pymemdyn && \
+    ln -s /opt/micromamba/envs/pyenv_general/bin/python3 /usr/local/bin/python3
 
- 
+
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh", "/usr/local/bin/pymemdyn" ]
+CMD [ "--help" ]
